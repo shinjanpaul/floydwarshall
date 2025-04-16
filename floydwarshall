@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <limits.h>
+#define V 3
+#define INF INT_MAX
+void printSolution(int dist[][V]) {
+    printf("+-----+-----+-----+-----+\n");
+    printf("| A'  |  1  |  2  |  3  |\n");
+    printf("+-----+-----+-----+-----+\n");
+    for (int i = 0; i < V; i++) {
+        printf("|  %d  ", i+1);
+        for (int j = 0; j < V; j++) {
+            if (dist[i][j] == INF)
+                printf("| INF ");
+            else
+                printf("| %3d ", dist[i][j]);
+        }
+        printf("|\n");
+        printf("+-----+-----+-----+-----+\n");
+    }
+    printf("\n");
+}
+void printPaths(int dist[][V], int next[][V]) {
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < V; j++) {
+            if (i != j) {
+                int u = i + 1;
+                int v = j + 1;               
+                if (next[i][j] == -1) {
+                    printf("%d -> %d: No path exists\n", u, v);
+                } else {
+                    printf("%d -> %d: %d", u, v, u);
+                    int intermediate = next[i][j];
+                    while (intermediate != j) {
+                        printf(" -> %d", intermediate + 1);
+                        intermediate = next[intermediate][j];
+                    }
+                    printf(" -> %d: %d\n", v,dist[i][j]);
+                }
+            }
+        }
+    }
+}
+void floydWarshall(int graph[][V]) {
+    int dist[V][V], i, j, k;
+    int next[V][V];
+    for (i = 0; i < V; i++) {
+        for (j = 0; j < V; j++) {
+            dist[i][j] = graph[i][j];
+            if (graph[i][j] != INF && i != j)
+                next[i][j] = j;
+            else
+                next[i][j] = -1;
+        }
+    }
+    for (k = 0; k < V; k++) {
+        for (i = 0; i < V; i++) {
+            for (j = 0; j < V; j++) {
+                if (dist[i][k] != INF && dist[k][j] != INF && 
+                    dist[i][j] > dist[i][k] + dist[k][j]) {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                    next[i][j] = next[i][k];
+                }
+            }
+        }
+        printf("After considering vertex %d as intermediate (A%d):\n", k+1, k+1);
+        printSolution(dist);
+    }
+    printf("Final Distance Matrix (A%d):\n", V);
+    printSolution(dist);
+    printf("\nShortest Paths with Weights:\n");
+    printPaths(dist, next);
+}
+int main() {
+    int graph[V][V] = { {0, 4, 11},
+                        {6, 0, 2},
+                        {3, 7, 0} };
+    printf("Initial Distance Matrix (A^o):\n");
+    printSolution(graph);
+    floydWarshall(graph);
+    return 0;
+}
